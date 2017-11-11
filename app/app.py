@@ -1,10 +1,31 @@
-from flask import Flask
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def home():
+    return render_template('index.html')
+
+@app.route('/view-blocks')
+def view_blocks():
+    return render_template('view-blocks.html')
+
+@app.route('/new-session')
+def new_session():
+    return render_template('new-session.html')
+
+@app.route('/create-session')
+def create_session():
+    assert request.method == 'POST'
+    return render_template('view-session.html', id=68687)
+
+@app.route('/view-session/<int:id>')
+def view_session(id):
+    return render_template('view-session.html', id=id)
+
+@app.route('/register-presence')
+def register_presence():
+    return render_template('register-presence.html')
 
 @app.route('/user/<string:username>')
 def show_user_profile(username):

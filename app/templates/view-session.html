@@ -1,0 +1,95 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        <title>Smart Presence</title>
+    </head>            
+    <body style="font-family: 'Open Sans', sans-serif;">
+        <div class="container center-div">
+            <h1>Smart Presence</h1>
+            <br>
+            <h3>Session Info</h3>
+            <div class="row no-gutters">
+                <label for="session-name" class="control-label col-xs-4">Name:</label>
+                <div id="session-name">EXAMPLE ONGOING SESSION</div>
+            </div>
+            <div class="row no-gutters">
+                <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
+                <div id="session-public-key">57A47DC5A865EF512D98E74A3D85FF13A13F44</div>
+            </div>
+            <div class="row no-gutters">
+                <label for="session-expiration" class="control-label col-xs-4">Expiration:</label>
+                <div id="session-public-key">11/21/2017 09:00 AM</div>
+            </div>
+
+            <div class="row no-gutters">
+                <label for="session-id" class="control-label col-xs-4">Generated ID:</label>
+                <div id="session-id">{{ id }}</div>
+            </div>
+            <br>
+            <div class="alert alert-info">
+                Provide attendees with the generated ID, so that they may register presence in this session.
+            </div>
+            <br>
+            <h3>Presences Registred</h3>
+            <table class="table table-striped" style="font-size: 12px">
+                <thead>
+                    <tr>
+                        <th>Date/time</th>
+                        <th>Public key</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td>11/07/2017 11:01 AM</td>
+                        <td>791A97354E195F475897150C39476193D7CAE4</td>
+                        <td>40.6791886253337</td>
+                        <td>-73.9716247409697</td>
+                        <td>
+                            <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q=40.6791886253337,-73.9716247409697')">
+                                <span class="glyphicon glyphicon-map-marker"></span> Map
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11/07/2017 11:01 AM</td>
+                        <td>791A97354E195F475897150C39476193D7CAE4</td>
+                        <td>40.6791886253337</td>
+                        <td>-73.9716247409697</td>
+                        <td>
+                            <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q=40.6791886253337,-73.9716247409697')">
+                                <span class="glyphicon glyphicon-map-marker"></span> Map
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11/07/2017 11:01 AM</td>
+                        <td>791A97354E195F475897150C39476193D7CAE4</td>
+                        <td>40.6791886253337</td>
+                        <td>-73.9716247409697</td>
+                        <td>
+                            <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q=40.6791886253337,-73.9716247409697')">
+                                <span class="glyphicon glyphicon-map-marker"></span> Map
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11/07/2017 11:01 AM</td>
+                        <td>791A97354E195F475897150C39476193D7CAE4</td>
+                        <td>40.6791886253337</td>
+                        <td>-73.9716247409697</td>
+                        <td>
+                            <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q=40.6791886253337,-73.9716247409697')">
+                                <span class="glyphicon glyphicon-map-marker"></span> Map
+                            </button>
+                        </td>
+                    </tr>
+            </table>
+        </div>
+    </body>
+</html>
