@@ -23,9 +23,12 @@ def create_session():
 def view_session(id):
     return render_template('view-session.html', id=id)
 
-@app.route('/register-presence')
+@app.route('/register-presence/', methods=['GET', 'POST'])
 def register_presence():
-    return render_template('register-presence.html')
+    if request.method == 'POST':
+        return render_template('register-presence.html', id=request.form['session-id'])
+
+    return render_template('register-presence.html', id=None)
 
 @app.route('/user/<string:username>')
 def show_user_profile(username):

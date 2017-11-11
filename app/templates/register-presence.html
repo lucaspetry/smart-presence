@@ -1,13 +1,103 @@
 <html>
     <head>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
         <title>Smart Presence</title>
     </head>            
-    <body style="text-align:center; font-family: 'Open Sans', sans-serif;">
-        <h1>Smart Presence - New Presence</h1>
-        <br><br><br>
+    <body style="font-family: 'Open Sans', sans-serif;">
+        <div class="container">
+            {% if id %}
+                <h1>Smart Presence - Presence Registration at Session {{ id }}</h1>
+                <br>
+                <h3>Session Info</h3>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Name:</label>
+                    <div id="session-name">EXAMPLE ONGOING SESSION</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
+                    <div id="session-public-key">57A47DC5A865EF512D98E74A3D85FF13A13F44</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-expiration" class="control-label col-xs-4">Expiration:</label>
+                    <div id="session-public-key">11/21/2017 09:00 AM</div>
+                </div>
+
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Session ID:</label>
+                    <div id="session-id">{{ id }}</div>
+                </div>
+                <br>
+                <h3>Your Location</h3>
+                <div id="map" style="height: 300px"></div>
+                <script>
+                  // Note: This example requires that you consent to location sharing when
+                  // prompted by your browser. If you see the error "The Geolocation service
+                  // failed.", it means you probably did not give permission for the browser to
+                  // locate you.
+                    var userLatitude = -1;
+                    var userLongitude = -1;
+
+                  var map, infoWindow;
+                  function initMap() {
+                    map = new google.maps.Map(document.getElementById('map'), {
+                      center: {lat: -27.601142, lng: -48.521248},
+                      zoom: 13
+                    });
+                    infoWindow = new google.maps.InfoWindow;
+
+                    // Try HTML5 geolocation.
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(function(position) {
+                        var pos = {
+                          lat: position.coords.latitude,
+                          lng: position.coords.longitude
+                        };
+
+                        userLatitude = position.coords.latitude;
+                        userLongitude = position.coords.longitude;
+
+                        infoWindow.setPosition(pos);
+                        infoWindow.setContent('You are here.');
+                        infoWindow.open(map);
+                        map.setCenter(pos);
+                      }, function() {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                      });
+                    } else {
+                      // Browser doesn't support Geolocation
+                      handleLocationError(false, infoWindow, map.getCenter());
+                    }
+                  }
+
+                  function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+                    infoWindow.setPosition(pos);
+                    infoWindow.setContent(browserHasGeolocation ?
+                                          'ERROR: The Geolocation service failed.<br>Please enable your location services.' :
+                                          'ERROR: Your browser doesn\'t support geolocation.');
+                    infoWindow.open(map);
+                  }
+                </script>
+                <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaR52gqiTinRfbyP4EkFw-BymcuNEZAqc&callback=initMap">
+                </script>
+                <br>
+                <form action="{{ url_for('register_presence') }}" method="post">
+                    <button type='submit' class="btn btn-primary">Confirm</button>
+                </form>
+            {% else %}
+                <h1>Smart Presence - Presence Registration</h1>
+                <br><br><br>
+                <form action="{{ url_for('register_presence') }}" method="post">
+                    <div class="form-group">
+                        <label for="session-id">Session id:</label>
+                        <input required type="text" class="form-control" id="session-id" name="session-id">
+                    </div>
+                    <button type='submit' class="btn btn-primary">Next</button>
+                </form>
+            {% endif %}
+        </div>
     </body>
 </html>
