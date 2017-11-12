@@ -6,5 +6,6 @@ class Session(object):
 		self.name = name
 		self.publicKey = publicKey
 		self.open = True
-		self.pendingTransactions = []
-		self.approvedTransactions = []
+		self.pendingTransactions = {}
+		self.approvedTransactions = {}
+		self.rejectedTransactions = {}

@@ -18,8 +18,9 @@
                 </div>
                 <div class="row no-gutters">
                     <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
-                    <div id="session-public-key">{{ session.publicKey }}</div>
+                    <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ session.publicKey.exportKey() }}</textarea>
                 </div>
+                <br>
                 <div class="row no-gutters">
                     <label for="session-id" class="control-label col-xs-4">Session ID:</label>
                     <div id="session-id">{{ session.id }}</div>
@@ -82,8 +83,8 @@
                     <input type="hidden" class="form-control" id="latitude" name="latitude">
                     <input type="hidden" class="form-control" id="longitude" name="longitude">
                     <div class="form-group">
-                        <label for="public-key">My public key:</label>
-                        <input required type="text" class="form-control" id="public-key" name="public-key">
+                        <label for="private-key">My key pair:</label><br>
+                        <textarea rows="8" cols="80" id="private-key" name="private-key"></textarea>
                     </div>
                     <button type='submit' class="btn btn-success">Confirm</button>
                 </form>

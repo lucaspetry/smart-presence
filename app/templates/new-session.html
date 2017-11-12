@@ -9,14 +9,20 @@
     <body style="font-family: 'Open Sans', sans-serif;">
         <div class="container">
             <h1>Smart Presence - New Session</h1>
+            <br>
+            <div class="row no-gutters">
+                <label for="session-name" class="control-label col-xs-4">Authority:</label>
+                <div id="session-name">{{ authority_name }}</div>
+            </div>
+            <div class="row no-gutters">
+                <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
+                <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ authority_pbk.exportKey() }}</textarea>
+            </div>
+            <br>
             <form action="{{ url_for('create_session') }}" method="post">
                 <div class="form-group">
                     <label for="session-name">Session name:</label>
                     <input required type="text" class="form-control" id="session-name" name="session-name">
-                </div>
-                <div class="form-group">
-                    <label for="public-key">My public key:</label>
-                    <input required type="text" class="form-control" id="public-key" name="public-key">
                 </div>
                 <button class="btn btn-primary" type="submit">Create</button>
             </form>

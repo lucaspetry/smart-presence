@@ -1,1 +1,65 @@
-view-presence.html
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        <title>Smart Presence</title>
+    </head>            
+    <body style="font-family: 'Open Sans', sans-serif;">
+        <div class="container">
+            {% if session and presence %}
+                <h1>Smart Presence - Presence Registration Request</h1>
+                <br>
+                <h3>Session Info</h3>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Name:</label>
+                    <div id="session-name">{{ session.name }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
+                    <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ session.publicKey.exportKey() }}</textarea>
+                </div>
+                <br>
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Session ID:</label>
+                    <div id="session-id">{{ session.id }}</div>
+                </div>
+                <br>
+                <h3>Presence Registration Request</h3>
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Request ID:</label>
+                    <div id="session-id">{{ presence.id }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Date/time:</label>
+                    <div id="session-id">{{ presence.timestamp|format_datetime() }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Latitude:</label>
+                    <div id="session-id">{{ presence.entity_lat }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Longitude:</label>
+                    <div id="session-id">{{ presence.entity_lon }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-id" class="control-label col-xs-4">Status:</label>
+                    {% if presence.pending %}
+                        <div id="session-public-key" class="label label-primary">Pending</div>
+                    {% elif presence.approved %}
+                        <div id="session-public-key" class="label label-success">Approved</div>
+                    {% else %}
+                    	<div id="session-public-key" class="label label-danger">Rejected</div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <h1>Smart Presence - Presence Registration Request</h1>
+                <br>
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </div>
+    </body>
+</html>

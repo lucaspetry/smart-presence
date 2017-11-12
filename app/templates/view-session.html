@@ -18,8 +18,9 @@
                 </div>
                 <div class="row no-gutters">
                     <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
-                    <div id="session-public-key">{{ session.publicKey }}</div>
+                    <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ session.publicKey.exportKey() }}</textarea>
                 </div>
+                <br>
                 <div class="row no-gutters">
                     <label for="session-expiration" class="control-label col-xs-4">Status:</label>
                     {% if session.open %}
@@ -37,77 +38,122 @@
                 <div class="alert alert-info">
                     Provide attendees with the generated ID, so that they may register presence in this session.
                 </div>
+                <script>
+                $(document).ready(function(){
+                    $('[data-toggle="popover"]').popover(); 
+                });
+
+                function copyToClipboard(element) {
+                    var aux = document.createElement("input");
+                    aux.setAttribute("value", document.getElementById(element).value);
+                      document.body.appendChild(aux);
+                      aux.select();
+                      document.execCommand("copy");
+
+                      document.body.removeChild(aux);
+                }
+                </script>
                 <br>
                 <h3>Presence Registration Requests</h3>
-                <table class="table table-striped" style="font-size: 12px">
-                    <thead>
-                        <tr>
-                            <th>Date/time</th>
-                            <th>Public key</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                            <th style="text-align: right"></th>
-                        </tr>
-                    </thead>
-                        <tr>
-                            <td>11/07/2017 11:01 AM</td>
-                            <td>791A97354E195F475897150C39476193D7CAE4</td>
-                            <td>40.6791886253337</td>
-                            <td>-73.9716247409697</td>
-                            <td style="text-align: right">
-                                <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q=40.6791886253337,-73.9716247409697')">
-                                    <span class="glyphicon glyphicon-map-marker"></span> Map
-                                </button>
-                                <button type="button" class="btn btn-success btn-sm")">Approve</button>
-                                <button type="button" class="btn btn-danger btn-sm")">Reject</button>
-                            </td>
-                        </tr>
-                </table>
+                {% if session.pendingTransactions|length == 0 %}
+                    <div class="alert alert-info">No pending requests.</div>
+                {% else %}
+                    <table class="table table-striped" style="font-size: 12px">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date/time</th>
+                                <th>Public key</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th style="text-align: right"></th>
+                            </tr>
+                        </thead>
+                            {% for presence in session.pendingTransactions.values() %}
+                                <tr>
+                                    <td>{{ presence.id }}</td>
+                                    <td>{{ presence.timestamp|format_datetime() }}</td>
+                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey() }}" id="publicKeyInput">
+                                    <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
+                                    <td>{{ presence.entity_lat }}</td>
+                                    <td>{{ presence.entity_lon }}</td>
+                                    <td style="text-align: right">
+                                        <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q={{ presence.entity_lat }},{{ presence.entity_lon }}')">
+                                            <span class="glyphicon glyphicon-map-marker"></span> Map
+                                        </button>
+                                        <button form="form-approve" type="submit" class="btn btn-success btn-sm")">Approve</button>
+                                        <button form="form-reject" type="submit" class="btn btn-danger btn-sm")">Reject</button>
+                                        <form action="{{ url_for('process_presence') }}" method="post" id="form-approve">
+                                            <input type="hidden" value="{{ session.id }}" name="session-id" id="session-id">
+                                            <input type="hidden" value="{{ presence.id }}" name="presence-id" id="presence-id">
+                                            <input type="hidden" value="approve" name="status" id="status">
+                                        </form>
+                                        <form action="{{ url_for('process_presence') }}" method="post" id="form-reject">
+                                            <input type="hidden" value="{{ session.id }}" name="session-id" id="session-id">
+                                            <input type="hidden" value="{{ presence.id }}" name="presence-id" id="presence-id">
+                                            <input type="hidden" value="reject" name="status" id="status">
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                    </table>
+                {% endif %}
                 <br>
                 <h3>Approved Requests</h3>
-                <table class="table table-striped" style="font-size: 12px">
-                    <thead>
-                        <tr>
-                            <th>Date/time</th>
-                            <th>Public key</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                            <th style="text-align: right">Block ID</th>
-                        </tr>
-                    </thead>
-                        <tr>
-                            <td>11/07/2017 11:01 AM</td>
-                            <td>791A97354E195F475897150C39476193D7CAE4</td>
-                            <td>40.6791886253337</td>
-                            <td>-73.9716247409697</td>
-                            <td style="text-align: right">7855562</td>
-                        </tr>
-                        <tr>
-                            <td>11/07/2017 11:01 AM</td>
-                            <td>791A97354E195F475897150C39476193D7CAE4</td>
-                            <td>40.6791886253337</td>
-                            <td>-73.9716247409697</td>
-                            <td style="text-align: right">Pending</td>
-                        </tr>
-                </table>
+                {% if session.approvedTransactions|length == 0 %}
+                    <div class="alert alert-info">No approved requests.</div>
+                {% else %}
+                    <table class="table table-striped" style="font-size: 12px">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date/time</th>
+                                <th>Public key</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th style="text-align: right">Block ID</th>
+                            </tr>
+                        </thead>
+                            {% for presence in session.approvedTransactions.values() %}
+                                <tr>
+                                    <td>{{ presence.id }}</td>
+                                    <td>{{ presence.timestamp|format_datetime() }}</td>
+                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey() }}" id="publicKeyInput">
+                                    <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
+                                    <td>{{ presence.entity_lat }}</td>
+                                    <td>{{ presence.entity_lon }}</td>
+                                    <td style="text-align: right">Pending</td>
+                                </tr>
+                            {% endfor %}
+                    </table>
+                {% endif %}
                 <br>
                 <h3>Rejected Requests</h3>
-                <table class="table table-striped" style="font-size: 12px">
-                    <thead>
-                        <tr>
-                            <th>Date/time</th>
-                            <th>Public key</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                        </tr>
-                    </thead>
-                        <tr>
-                            <td>11/07/2017 11:01 AM</td>
-                            <td>791A97354E195F475897150C39476193D7CAE4</td>
-                            <td>40.6791886253337</td>
-                            <td>-73.9716247409697</td>
-                        </tr>
-                </table>
+                {% if session.rejectedTransactions|length == 0 %}
+                    <div class="alert alert-info">No rejected requests.</div>
+                {% else %}
+                    <table class="table table-striped" style="font-size: 12px">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date/time</th>
+                                <th>Public key</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                            </tr>
+                        </thead>
+                            {% for presence in session.rejectedTransactions.values() %}
+                                <tr>
+                                    <td>{{ presence.id }}</td>
+                                    <td>{{ presence.timestamp|format_datetime() }}</td>
+                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey() }}" id="publicKeyInput">
+                                    <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
+                                    <td>{{ presence.entity_lat }}</td>
+                                    <td>{{ presence.entity_lon }}</td>
+                                </tr>
+                            {% endfor %}
+                    </table>
+                {% endif %}
                 <br>
                 {% if session.open %}
                     <form action="{{ url_for('close_session') }}" method="post">
@@ -117,9 +163,7 @@
                 {% endif %}
             {% else %}
                 <br>
-                <div class="alert alert-danger">
-                    This session does not exist.
-                </div>
+                <div class="alert alert-danger">This session does not exist.</div>
             {% endif %}
         </div>
     </body>
