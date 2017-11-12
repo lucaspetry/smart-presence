@@ -16,7 +16,7 @@
             </div>
             <div class="row no-gutters">
                 <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
-                <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ authority_pbk.exportKey() }}</textarea>
+                <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ authority_pbk.exportKey()|format_key() }}</textarea>
             </div>
             <br>
             <form action="{{ url_for('create_session') }}" method="post">

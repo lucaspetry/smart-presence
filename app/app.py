@@ -19,7 +19,11 @@ presences = {}
 def format_datetime(value):
     return time.strftime('%m/%d/%Y %H:%M:%S UTC', value)
 
+def format_key(value):
+    return str(value).replace("\\n", "")
+
 app.jinja_env.filters['format_datetime'] = format_datetime
+app.jinja_env.filters['format_key'] = format_key
 
 #private_key = RSA.generate(2048)
 #with open("key.key", "wb") as file:

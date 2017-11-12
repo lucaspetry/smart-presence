@@ -18,7 +18,7 @@
                 </div>
                 <div class="row no-gutters">
                     <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
-                    <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ session.publicKey.exportKey() }}</textarea>
+                    <textarea  id="session-public-key" rows="8" cols="80" disabled>{{ session.publicKey.exportKey()|format_key() }}</textarea>
                 </div>
                 <br>
                 <div class="row no-gutters">
@@ -73,7 +73,7 @@
                                 <tr>
                                     <td>{{ presence.id }}</td>
                                     <td>{{ presence.timestamp|format_datetime() }}</td>
-                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey() }}" id="publicKeyInput">
+                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey()|format_key() }}" id="publicKeyInput">
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
                                     <td>{{ presence.entity_lat }}</td>
                                     <td>{{ presence.entity_lon }}</td>
@@ -118,7 +118,7 @@
                                 <tr>
                                     <td>{{ presence.id }}</td>
                                     <td>{{ presence.timestamp|format_datetime() }}</td>
-                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey() }}" id="publicKeyInput">
+                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey()|format_key() }}" id="publicKeyInput">
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
                                     <td>{{ presence.entity_lat }}</td>
                                     <td>{{ presence.entity_lon }}</td>
@@ -146,7 +146,7 @@
                                 <tr>
                                     <td>{{ presence.id }}</td>
                                     <td>{{ presence.timestamp|format_datetime() }}</td>
-                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey() }}" id="publicKeyInput">
+                                    <input type="hidden" value="{{ presence.entity_pbk.exportKey()|format_key() }}" id="publicKeyInput">
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
                                     <td>{{ presence.entity_lat }}</td>
                                     <td>{{ presence.entity_lon }}</td>
