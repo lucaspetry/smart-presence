@@ -8,35 +8,26 @@
     </head>            
     <body style="font-family: 'Open Sans', sans-serif;">
         <div class="container">
-            {% if id %}
-                <h1>Smart Presence - Presence Registration at Session {{ id }}</h1>
+            {% if session and session.open %}
+                <h1>Smart Presence - Presence Registration at Session {{ session.id }}</h1>
                 <br>
                 <h3>Session Info</h3>
                 <div class="row no-gutters">
                     <label for="session-name" class="control-label col-xs-4">Name:</label>
-                    <div id="session-name">EXAMPLE ONGOING SESSION</div>
+                    <div id="session-name">{{ session.name }}</div>
                 </div>
                 <div class="row no-gutters">
                     <label for="session-public-key" class="control-label col-xs-4">Public key:</label>
-                    <div id="session-public-key">57A47DC5A865EF512D98E74A3D85FF13A13F44</div>
+                    <div id="session-public-key">{{ session.publicKey }}</div>
                 </div>
-                <div class="row no-gutters">
-                    <label for="session-expiration" class="control-label col-xs-4">Expiration:</label>
-                    <div id="session-public-key">11/21/2017 09:00 AM</div>
-                </div>
-
                 <div class="row no-gutters">
                     <label for="session-id" class="control-label col-xs-4">Session ID:</label>
-                    <div id="session-id">{{ id }}</div>
+                    <div id="session-id">{{ session.id }}</div>
                 </div>
                 <br>
-                <h3>Your Location</h3>
+                <b>My location:</b>
                 <div id="map" style="height: 300px"></div>
                 <script>
-                  // Note: This example requires that you consent to location sharing when
-                  // prompted by your browser. If you see the error "The Geolocation service
-                  // failed.", it means you probably did not give permission for the browser to
-                  // locate you.
                     var userLatitude = -1;
                     var userLongitude = -1;
 
@@ -58,6 +49,8 @@
 
                         userLatitude = position.coords.latitude;
                         userLongitude = position.coords.longitude;
+                        document.getElementById("latitude").value = userLatitude
+                        document.getElementById("longitude").value = userLongitude
 
                         infoWindow.setPosition(pos);
                         infoWindow.setContent('You are here.');
@@ -85,11 +78,28 @@
                 </script>
                 <br>
                 <form action="{{ url_for('register_presence') }}" method="post">
-                    <button type='submit' class="btn btn-primary">Confirm</button>
+                    <input type="hidden" value="{{ session.id }}" class="form-control" id="session-id" name="session-id">
+                    <input type="hidden" class="form-control" id="latitude" name="latitude">
+                    <input type="hidden" class="form-control" id="longitude" name="longitude">
+                    <div class="form-group">
+                        <label for="public-key">My public key:</label>
+                        <input required type="text" class="form-control" id="public-key" name="public-key">
+                    </div>
+                    <button type='submit' class="btn btn-success">Confirm</button>
                 </form>
             {% else %}
                 <h1>Smart Presence - Presence Registration</h1>
-                <br><br><br>
+                <br>
+                {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error }}
+                    </div>
+                {% elif session and not session.open %}
+                    <div class="alert alert-danger">
+                        The requested session is not open anymore.
+                    </div>
+                {% endif %}
+                <br>
                 <form action="{{ url_for('register_presence') }}" method="post">
                     <div class="form-group">
                         <label for="session-id">Session id:</label>

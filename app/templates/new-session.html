@@ -9,21 +9,17 @@
     <body style="font-family: 'Open Sans', sans-serif;">
         <div class="container">
             <h1>Smart Presence - New Session</h1>
-            <!-- <form> -->
+            <form action="{{ url_for('create_session') }}" method="post">
                 <div class="form-group">
                     <label for="session-name">Session name:</label>
-                    <input type="text" class="form-control" id="session-name">
+                    <input required type="text" class="form-control" id="session-name" name="session-name">
                 </div>
                 <div class="form-group">
                     <label for="public-key">My public key:</label>
-                    <input type="text" class="form-control" id="public-key">
+                    <input required type="text" class="form-control" id="public-key" name="public-key">
                 </div>
-                <div class="form-group">
-                    <label for="session-expiration">Session expiration:</label>
-                    <input type="datetime-local" class="form-control" id="session-expiration">
-                </div>
-                <button class="btn btn-primary" onclick="window.location.href = 'view-session/832238'">Create</button>
-            <!-- </form> -->
+                <button class="btn btn-primary" type="submit">Create</button>
+            </form>
         </div>
     </body>
 </html>
