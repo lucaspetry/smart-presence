@@ -5,10 +5,20 @@ from base64 import b64encode, b64decode
 
 class Blockchain(object):
 
-	def __init__(self, block_size):
+	def __init__(self, block_size=5):
 		self.block_size = block_size
-		self.blocks = [Block([Transaction(starting_accounts)], 0)]
+		self.blocks = []
 		self.pending_transactions = []
+
+	def contains_block(self, block):
+		for b in blocks:
+			if b.hash == block.hash:
+				return True
+
+		return False
+
+	def get_last_blocks(self, count):
+		return self.blocks[-count:]
 
 	# Function to add a single block to the chain
 	def add_block(self, block):
@@ -83,13 +93,13 @@ class Blockchain(object):
 	def is_valid(self):
 		pass
 
-	def jsonify(self):
-		return [block.jsonify() for block in self.blocks]
+	def json(self):
+		return [block.json() for block in self.blocks]
 
 class Block(object):
 
-	def __init__(self, id, transactions, parent=None):
-		self.id = id
+	def __init__(self, transactions, parent=None):
+		self.id = parent.id + 1 if parent else 1
 		self.transactions = transactions
 		self.parent = parent
 		self.parent_hash = self.parent.hash if self.parent else ''
@@ -116,12 +126,12 @@ class Block(object):
 
 		return True
 
-	def jsonify(self):
+	def json(self):
 		json_block = {
 			'id': self.id,
 			'parent_hash': self.parent_hash,
 			'transaction_count': self.size,
-			'transactions': [t for t in self.transactions],
+			'transactions': [t.json() for t in self.transactions],
 			'hash': self.hash
 		}
 
@@ -148,4 +158,4 @@ if __name__ == '__main__':
 	transactions = [make_transaction() for i in range(30)]
 
 	chain.add_transactions(transactions)
-	json = chain.jsonify()
+	json = chain.json()
