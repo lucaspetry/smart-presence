@@ -6,8 +6,47 @@
         <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
         <title>Smart Presence</title>
     </head>            
-    <body style="text-align:center; font-family: 'Open Sans', sans-serif;">
-        <h1>Smart Presence - View Blocks</h1>
-        <br><br><br>
+    <body style="font-family: 'Open Sans', sans-serif;">
+        <div class="container">
+            <h1>Smart Presence - Latest 10 Blocks</h1>
+            <br><br>
+            <script>
+            $(document).ready(function(){
+                $('[data-toggle="popover"]').popover(); 
+            });
+
+            function copyToClipboard(element) {
+                var aux = document.createElement("input");
+                aux.setAttribute("value", document.getElementById(element).value);
+                  document.body.appendChild(aux);
+                  aux.select();
+                  document.execCommand("copy");
+
+                  document.body.removeChild(aux);
+            }
+            </script>
+            {% if blocks|length == 0 %}
+                <div class="alert alert-info">The chain is empty!</div>
+            {% else %}
+                <table class="table table-striped" style="font-size: 12px">
+                    <thead>
+                        <tr>
+                            <th style="text-align: right">#</th>
+                            <th>Date/time</th>
+                            <th style="text-align: right">Transactions</th>
+                            <th>Hash</th>
+                        </tr>
+                    </thead>
+                        {% for block in blocks %}
+                            <tr>
+                                <td style="text-align: right"><a href="{{ url_for('view_block', id=block.id) }}">{{ block.id }}</a></td>
+                                <td>{{ block.timestamp|format_datetime() }}</td>
+                                <td style="text-align: right">{{ block.size }}</td>
+                                <td>{{ block.hash|base64_encode() }}</td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            {% endif %}
+        </div>
     </body>
 </html>

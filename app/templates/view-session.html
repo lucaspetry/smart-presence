@@ -61,22 +61,22 @@
                     <table class="table table-striped" style="font-size: 12px">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style="text-align: right">#</th>
                                 <th>Date/time</th>
                                 <th>Public key</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
+                                <th style="text-align: right">Latitude</th>
+                                <th style="text-align: right">Longitude</th>
                                 <th style="text-align: right"></th>
                             </tr>
                         </thead>
                             {% for presence in session.pendingTransactions.values() %}
                                 <tr>
-                                    <td>{{ presence.id }}</td>
+                                    <td style="text-align: right">{{ presence.id }}</td>
                                     <td>{{ presence.timestamp|format_datetime() }}</td>
                                     <input type="hidden" value="{{ presence.entity_pbk.exportKey()|format_key() }}" id="publicKeyInput">
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
-                                    <td>{{ presence.entity_lat }}</td>
-                                    <td>{{ presence.entity_lon }}</td>
+                                    <td style="text-align: right">{{ presence.entity_lat }}</td>
+                                    <td style="text-align: right">{{ presence.entity_lon }}</td>
                                     <td style="text-align: right">
                                         <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q={{ presence.entity_lat }},{{ presence.entity_lon }}')">
                                             <span class="glyphicon glyphicon-map-marker"></span> Map
@@ -106,22 +106,22 @@
                     <table class="table table-striped" style="font-size: 12px">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style="text-align: right">#</th>
                                 <th>Date/time</th>
                                 <th>Public key</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
+                                <th style="text-align: right">Latitude</th>
+                                <th style="text-align: right">Longitude</th>
                                 <th style="text-align: right">Block ID</th>
                             </tr>
                         </thead>
                             {% for presence in session.approvedTransactions.values() %}
                                 <tr>
-                                    <td>{{ presence.id }}</td>
+                                    <td style="text-align: right">{{ presence.id }}</td>
                                     <td>{{ presence.timestamp|format_datetime() }}</td>
                                     <input type="hidden" value="{{ presence.entity_pbk.exportKey()|format_key() }}" id="publicKeyInput">
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
-                                    <td>{{ presence.entity_lat }}</td>
-                                    <td>{{ presence.entity_lon }}</td>
+                                    <td style="text-align: right">{{ presence.entity_lat }}</td>
+                                    <td style="text-align: right">{{ presence.entity_lon }}</td>
                                     <td style="text-align: right">Pending</td>
                                 </tr>
                             {% endfor %}
@@ -135,21 +135,21 @@
                     <table class="table table-striped" style="font-size: 12px">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style="text-align: right">#</th>
                                 <th>Date/time</th>
                                 <th>Public key</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
+                                <th style="text-align: right">Latitude</th>
+                                <th style="text-align: right">Longitude</th>
                             </tr>
                         </thead>
                             {% for presence in session.rejectedTransactions.values() %}
                                 <tr>
-                                    <td>{{ presence.id }}</td>
+                                    <td style="text-align: right">{{ presence.id }}</td>
                                     <td>{{ presence.timestamp|format_datetime() }}</td>
                                     <input type="hidden" value="{{ presence.entity_pbk.exportKey()|format_key() }}" id="publicKeyInput">
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
-                                    <td>{{ presence.entity_lat }}</td>
-                                    <td>{{ presence.entity_lon }}</td>
+                                    <td style="text-align: right">{{ presence.entity_lat }}</td>
+                                    <td style="text-align: right">{{ presence.entity_lon }}</td>
                                 </tr>
                             {% endfor %}
                     </table>

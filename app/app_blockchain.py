@@ -8,7 +8,7 @@ from blockchain import Blockchain, Block
 app = Flask(__name__)
 api = Api(app)
 
-BLOCK_SIZE = 5
+BLOCK_SIZE = 2
 
 chain = Blockchain(BLOCK_SIZE)
 pending_transactions = []
@@ -16,6 +16,8 @@ pending_transactions = []
 class TransactionRes(Resource):
 
     def post(self):
+        global pending_transactions, chain
+
         transaction = {
             'id' : request.json['id'],
             'entity_pbk' : request.json['entity_pbk'],
@@ -33,18 +35,18 @@ class TransactionRes(Resource):
         if len(pending_transactions) == BLOCK_SIZE:
             block = Block(pending_transactions, chain.last_block())
             chain.add_block(block)
-
+            print("Blockchain: block added!")
             # Propagate block to other nodes
             # Wait for confirmation (callback)
 
-            pending_transactions.clear()
+            pending_transactions = []
 
         return {'status' : 'success'}
 
 class BlockRes(Resource):
 
     def post(self):
-        block = None # Block() # TO-DO materialize block
+        block = Block.fromJSON(request.json['block'])
 
         if chain.contains_block(block):
             return {'status' : 'failure'}
@@ -54,12 +56,21 @@ class BlockRes(Resource):
 
         return {'status' : 'failure'}
 
+class BlockGetRes(Resource):
+
+    def get(self, id):
+        block = chain.get_block(id)
+        block = block.json() if block else {}
+        return jsonify(block)
+
 class BlocksRes(Resource):
 
     def get(self, count):
-        return [b.json() for b in chain.get_last_blocks(count)]
+        return jsonify(sorted([b.json() for b in chain.get_last_blocks(count)], \
+            key=lambda block: block['id'], reverse=True))
 
 
 api.add_resource(TransactionRes, '/transaction')
 api.add_resource(BlockRes, '/block')
+api.add_resource(BlockGetRes, '/block/<int:id>')
 api.add_resource(BlocksRes, '/blocks/<int:count>')

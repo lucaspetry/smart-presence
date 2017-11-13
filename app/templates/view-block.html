@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        <title>Smart Presence</title>
+    </head>            
+    <body style="font-family: 'Open Sans', sans-serif;">
+        <div class="container">
+            {% if block %}
+                <h1>Smart Presence - Block #{{ block.id }}</h1>
+                <br>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Id:</label>
+                    <div id="session-name">{{ block.id }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Date/time:</label>
+                    <div id="session-name">{{ block.timestamp|format_datetime() }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Transaction count:</label>
+                    <div id="session-name">{{ block.size }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Hash:</label>
+                    <div id="session-name">{{ block.hash|base64_encode() }}</div>
+                </div>
+                <div class="row no-gutters">
+                    <label for="session-name" class="control-label col-xs-4">Parent hash:</label>
+                    <div id="session-name">{{ block.parent_hash|base64_encode() }}</div>
+                </div>
+                <br>
+                <h3>Transactions</h3>
+                {% if block.transactions|length == 0 %}
+                    <div class="alert alert-danger">No transactions found! This may be dangerous!</div>
+                {% else %}
+                    <table class="table table-striped" style="font-size: 12px">
+                        <thead>
+                            <tr>
+                                <th style="text-align: right">#</th>
+                                <th>Date/time</th>
+                                <th style="text-align: right">Entity latitude</th>
+                                <th style="text-align: right">Entity longitude</th>
+                            </tr>
+                        </thead>
+                            {% for transaction in block.transactions %}
+                                <tr>
+                                    <td style="text-align: right">{{ transaction.id }}</td>
+                                    <td>{{ transaction.timestamp|format_datetime() }}</td>
+                                    <td style="text-align: right">{{ transaction.entity_lat }}</td>
+                                    <td style="text-align: right">{{ transaction.entity_lon }}</td>
+                                    <td style="text-align: right">
+                                        <button type="button" class="btn btn-default btn-sm" onclick="window.open('https://www.google.com/maps/?q={{ transaction.entity_lat }},{{ transaction.entity_lon }}')">
+                                            <span class="glyphicon glyphicon-map-marker"></span> Map
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                    </table>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-danger">Block not found!</div>
+            {% endif %}
+        </div>
+    </body>
+</html>

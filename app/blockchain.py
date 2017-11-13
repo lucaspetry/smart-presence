@@ -1,7 +1,9 @@
 import json
 import random
 import Crypto.Hash.SHA256 as SHA256
-from base64 import b64encode, b64decode 
+from base64 import b64encode, b64decode
+from smart_presence import SmartPresence
+import time, calendar
 
 class Blockchain(object):
 
@@ -20,9 +22,16 @@ class Blockchain(object):
 	def get_last_blocks(self, count):
 		return self.blocks[-count:]
 
+	def get_block(self, id):
+		for block in self.blocks:
+			if block.id == id:
+				return block
+
+		return None
+
 	# Function to add a single block to the chain
 	def add_block(self, block):
-		if block.is_valid(self.accounts_state, self.last_block()):
+		if block.is_valid():
 			self.blocks.append(block)
 			return True
 		
@@ -98,15 +107,28 @@ class Blockchain(object):
 
 class Block(object):
 
+	@staticmethod
+	def fromJSON(json):
+		obj = Block([], None)
+		obj.id = json['id']
+		obj.timestamp = time.gmtime(calendar.timegm(json['timestamp']))
+		obj.parent_hash = b64decode(json['parent_hash']) if json['parent_hash'] else None
+		obj.size = json['transaction_count']
+		obj.transactions = [SmartPresence.fromJSON(t) for t in json['transactions']]
+		obj.hash = b64decode(json['hash'])
+
+		return obj
+
 	def __init__(self, transactions, parent=None):
 		self.id = parent.id + 1 if parent else 1
+		self.timestamp = time.gmtime()
 		self.transactions = transactions
 		self.parent = parent
 		self.parent_hash = self.parent.hash if self.parent else ''
 		self.size = len(transactions)
 		self.hash = self.to_SHA256()
 
-	def is_valid(self, current_accounts_state):
+	def is_valid(self):
 		# Block ID is greater than parent ID by 1
 		if self.parent and self.id - self.parent.id != 1:
 			return False
@@ -127,12 +149,18 @@ class Block(object):
 		return True
 
 	def json(self):
+		parent_hash = None
+
+		if self.parent:
+			parent_hash = b64encode(self.parent_hash).decode('utf-8')
+
 		json_block = {
 			'id': self.id,
-			'parent_hash': self.parent_hash,
+			'timestamp' : self.timestamp,
+			'parent_hash': parent_hash,
 			'transaction_count': self.size,
 			'transactions': [t.json() for t in self.transactions],
-			'hash': self.hash
+			'hash': b64encode(self.hash).decode('utf-8')
 		}
 
 		return json_block
@@ -141,15 +169,20 @@ class Block(object):
 		return SHA256.new(self.to_base64()).digest()
 
 	def to_base64(self):
+		parent_hash = None
+
+		if self.parent:
+			parent_hash = b64encode(self.parent_hash).decode('utf-8')
+
 		block_content = {
-			'id': self.id, 
-			'parent_hash': self.parent_hash, 
+			'id': self.id,
+			'timestamp' : self.timestamp,
+			'parent_hash': parent_hash, 
 			'transaction_count': self.size, 
-			'transactions': [t for t in self.transactions]
+			'transactions': [t.json() for t in self.transactions]
 		}
 
-		print(block_content) # Verify if it needs to be sorted
-		return b64encode(bytes(block_content, 'utf-8'))
+		return b64encode(bytes(json.dumps(block_content, sort_keys=True), 'utf-8'))
 
 
 

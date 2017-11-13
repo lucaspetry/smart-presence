@@ -31,6 +31,9 @@ class SmartPresence(object):
 		self.pending = True
 		self.approved = None
 
+	def is_valid(self):
+		return self.check_signatures() # What else?
+
 	def sign_entity(self, entity_key_pair):
 		self.entity_signature = entity_key_pair.decrypt(self.to_SHA256())
 

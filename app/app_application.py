@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for
 from session import Session
 from smart_presence import SmartPresence
+from blockchain import Block
 import random
 from Crypto.PublicKey import RSA
 import time
 import requests
 import json
+from base64 import b64encode
 
 app = Flask(__name__)
 
@@ -15,6 +17,9 @@ AUTHORITY_NAME = 'MY FAVORITE AUTHORITY'
 AUTHORITY_KEYPAIR = RSA.generate(2048)
 AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
 
+BLOCK_COUNT = 10
+URL_GET_BLOCKS = 'http://127.0.0.1:5002/blocks/' + str(BLOCK_COUNT)
+URL_GET_BLOCK = 'http://127.0.0.1:5002/block/'
 URL_POST_TRANSACTION = 'http://127.0.0.1:5002/transaction'
 
 sessions = { 1 : Session(1, "Teste", AUTHORITY_PBK) }
@@ -26,8 +31,12 @@ def format_datetime(value):
 def format_key(value):
     return str(value).replace("\\n", "")
 
+def base64_encode(value):
+    return b64encode(value).decode('utf-8') if value else 'null'
+
 app.jinja_env.filters['format_datetime'] = format_datetime
 app.jinja_env.filters['format_key'] = format_key
+app.jinja_env.filters['base64_encode'] = base64_encode
 
 #private_key = RSA.generate(2048)
 #with open("key.key", "wb") as file:
@@ -36,6 +45,14 @@ app.jinja_env.filters['format_key'] = format_key
 def postTransaction(transaction):
     headers = {'content-type': 'application/json'}
     response = requests.post(URL_POST_TRANSACTION, data=json.dumps(transaction.json()), headers=headers)
+
+def getBlocks():
+    response = requests.get(URL_GET_BLOCKS)
+    return [Block.fromJSON(block) for block in response.json()]
+
+def getBlock(id):
+    response = requests.get(URL_GET_BLOCK + str(id))
+    return Block.fromJSON(response.json())
 
 def createSession(name):
     id = random.getrandbits(RAND_BITS)
@@ -52,7 +69,13 @@ def home():
 
 @app.route('/view-blocks')
 def view_blocks():
-    return render_template('view-blocks.html')
+    print(getBlocks())
+    return render_template('view-blocks.html', blocks=getBlocks())
+
+@app.route('/view-block/<int:id>')
+def view_block(id):
+    print(getBlocks())
+    return render_template('view-block.html', block=getBlock(id))
 
 @app.route('/new-session')
 def new_session():
@@ -132,10 +155,10 @@ def process_presence():
     if presence.approved:
         presence.sign_authority(AUTHORITY_KEYPAIR)
         session.approvedTransactions[presenceId] = presence
+        postTransaction(presence)
     else:
         session.rejectedTransactions[presenceId] = presence
 
-    postTransaction(presence)
     return redirect(url_for('view_session', id=sessionId))
 
 @app.route('/view-presence/<int:sessionId>/<int:presenceId>')
