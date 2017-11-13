@@ -7,9 +7,10 @@ class SmartPresence(object):
 
 	@staticmethod
 	def fromJSON(json):
-		obj = SmartPresence(json['id'], RSA.importKey(b64decode(json['authority_pbk'][2:-1])), \
-			RSA.importKey(b64decode(json['entity_pbk'][2:-1])), json['entity_lat'], json['entity_lon'])
+		authorityKey = RSA.importKey(b64decode(json['authority_pbk']))
+		entityKey = RSA.importKey(b64decode(json['entity_pbk']))
 
+		obj = SmartPresence(json['id'], authorityKey, entityKey, json['entity_lat'], json['entity_lon'])
 		obj.timestamp = time.gmtime(calendar.timegm(json['timestamp']))
 		obj.entity_signature = b64decode(json['entity_signature'][2:-1])
 		obj.authority_signature = b64decode(json['authority_signature'][2:-1])
@@ -60,11 +61,10 @@ class SmartPresence(object):
 		return True
 
 	def to_SHA256(self):
-		print(self.to_base64())
 		return SHA256.new(self.to_base64()).digest()
 
 	def to_base64(self):
-		string = str(self.timestamp) + str(self.authority_pbk) + str(self.entity_pbk) \
+		string = str(self.timestamp) + str(self.authority_pbk.exportKey()) + str(self.entity_pbk.exportKey()) \
 		+ str(self.entity_lat) + str(self.entity_lon)
 
 		return b64encode(bytes(string, 'utf-8'))
@@ -72,8 +72,8 @@ class SmartPresence(object):
 	def json(self):
 		block = {
 			'id' : self.id,
-			'entity_pbk' : str(b64encode(self.entity_pbk.exportKey())),
-			'authority_pbk' : str(b64encode(self.authority_pbk.exportKey())),
+			'entity_pbk' : str(b64encode(self.entity_pbk.exportKey()).decode('utf-8')),
+			'authority_pbk' : str(b64encode(self.authority_pbk.exportKey()).decode('utf-8')),
 			'timestamp' : self.timestamp,
 			'entity_lat' : self.entity_lat,
 			'entity_lon' : self.entity_lon,

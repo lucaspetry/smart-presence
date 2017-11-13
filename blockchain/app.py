@@ -23,21 +23,9 @@ class Transaction(Resource):
         }
 
         sp = SmartPresence.fromJSON(block)
-        print(sp.id)
-        print(sp.timestamp)
-        print(sp.entity_lat)
-        print(sp.entity_lon)
-        print(sp.entity_pbk.exportKey())
-        print(sp.authority_pbk.exportKey())
-        print(sp.entity_signature)
-        print(sp.authority_signature)
-        print(sp.check_signatures())
 
         # TO-DO process transaction sp
 
         return {'status' : 'success'}
 
 api.add_resource(Transaction, '/transaction')
-
-if __name__ == '__main__':
-     app.run(port='5002')

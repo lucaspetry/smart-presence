@@ -15,6 +15,8 @@ AUTHORITY_NAME = 'MY FAVORITE AUTHORITY'
 AUTHORITY_KEYPAIR = RSA.generate(2048)
 AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
 
+URL_POST_TRANSACTION = 'http://127.0.0.1:5002/transaction'
+
 sessions = { 1 : Session(1, "Teste", AUTHORITY_PBK) }
 presences = {}
 
@@ -32,19 +34,8 @@ app.jinja_env.filters['format_key'] = format_key
     #file.write(private_key.exportKey('PEM'))
 
 def postTransaction(transaction):
-    url = 'http://127.0.0.1:5002/transaction'
     headers = {'content-type': 'application/json'}
-
-    print(transaction.id)
-    print(transaction.timestamp)
-    print(transaction.entity_lat)
-    print(transaction.entity_lon)
-    print(transaction.entity_pbk.exportKey())
-    print(transaction.authority_pbk.exportKey())
-    print(transaction.entity_signature)
-    print(transaction.authority_signature)
-
-    response = requests.post(url, data=json.dumps(transaction.json()), headers=headers)
+    response = requests.post(URL_POST_TRANSACTION, data=json.dumps(transaction.json()), headers=headers)
 
 def createSession(name):
     id = random.getrandbits(RAND_BITS)
