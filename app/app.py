@@ -4,6 +4,8 @@ from smart_presence import SmartPresence
 import random
 from Crypto.PublicKey import RSA
 import time
+import requests
+import json
 
 app = Flask(__name__)
 
@@ -28,6 +30,21 @@ app.jinja_env.filters['format_key'] = format_key
 #private_key = RSA.generate(2048)
 #with open("key.key", "wb") as file:
     #file.write(private_key.exportKey('PEM'))
+
+def postTransaction(transaction):
+    url = 'http://127.0.0.1:5002/transaction'
+    headers = {'content-type': 'application/json'}
+
+    print(transaction.id)
+    print(transaction.timestamp)
+    print(transaction.entity_lat)
+    print(transaction.entity_lon)
+    print(transaction.entity_pbk.exportKey())
+    print(transaction.authority_pbk.exportKey())
+    print(transaction.entity_signature)
+    print(transaction.authority_signature)
+
+    response = requests.post(url, data=json.dumps(transaction.json()), headers=headers)
 
 def createSession(name):
     id = random.getrandbits(RAND_BITS)
@@ -93,7 +110,6 @@ def register_presence():
                 id = random.getrandbits(RAND_BITS)
 
             sp = SmartPresence(id, AUTHORITY_PBK, keyPair.publickey(), latitude, longitude)
-            sp.sign_authority(AUTHORITY_KEYPAIR)
             sp.sign_entity(keyPair)
             presences[id] = sp
             sessions[sessionId].pendingTransactions[sp.id] = sp
@@ -123,12 +139,12 @@ def process_presence():
     session.pendingTransactions.pop(presenceId)
 
     if presence.approved:
+        presence.sign_authority(AUTHORITY_KEYPAIR)
         session.approvedTransactions[presenceId] = presence
     else:
         session.rejectedTransactions[presenceId] = presence
 
-    # TO-DO add to blockchain ?
-
+    postTransaction(presence)
     return redirect(url_for('view_session', id=sessionId))
 
 @app.route('/view-presence/<int:sessionId>/<int:presenceId>')
