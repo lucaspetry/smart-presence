@@ -39,11 +39,9 @@ AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
 chain = Blockchain(BLOCK_SIZE)
 pending_transactions = []
 
-class TransactionRes(Resource):
+class TransactionAppRes(Resource):
 
     def post(self):
-        global pending_transactions, chain
-
         transaction = {
             'id' : request.json['id'],
             'entity_pbk' : request.json['entity_pbk'],
@@ -55,13 +53,18 @@ class TransactionRes(Resource):
             'authority_signature' : request.json['authority_signature']
         }
 
+        self.process_transaction(transaction)
+        return {'status' : 'success'}
+
+    def process_transaction(self, transaction):
+        global pending_transactions, chain
         sp = SmartPresence.fromJSON(transaction)
         pending_transactions.append(sp)
 
         if len(pending_transactions) == BLOCK_SIZE:
             block = Block(AUTHORITY_PBK, pending_transactions, chain.get_last_block())
             block.sign(AUTHORITY_KEYPAIR)
-            
+
             if chain.add_block(block, authorities):
                 print("Blockchain: block added!")
                 # Propagate block to other nodes
@@ -79,8 +82,6 @@ class TransactionRes(Resource):
                         remainder_transactions.append(transaction)
 
                 pending_transactions = remainder_transactions
-
-        return {'status' : 'success'}
 
 class BlockRes(Resource):
 
@@ -108,7 +109,8 @@ class BlocksRes(Resource):
         return jsonify(sorted([b.json() for b in chain.get_last_blocks(count)], \
             key=lambda block: block['id'], reverse=True))
 
-api.add_resource(TransactionRes, '/transaction')
+api.add_resource(TransactionAppRes, '/transaction')
+api.add_resource(TransactionAppRes, '/post-transaction')
 api.add_resource(BlockRes, '/block')
 api.add_resource(BlockGetRes, '/block/<int:id>')
 api.add_resource(BlocksRes, '/blocks/<int:count>')

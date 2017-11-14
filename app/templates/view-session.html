@@ -111,7 +111,6 @@
                                 <th>Public key</th>
                                 <th style="text-align: right">Latitude</th>
                                 <th style="text-align: right">Longitude</th>
-                                <th style="text-align: right">Block ID</th>
                             </tr>
                         </thead>
                             {% for presence in session.approvedTransactions.values() %}
@@ -122,7 +121,6 @@
                                     <td><a href="#" onclick="copyToClipboard('publicKeyInput')">Copy to clipboard</a></td>
                                     <td style="text-align: right">{{ presence.entity_lat }}</td>
                                     <td style="text-align: right">{{ presence.entity_lon }}</td>
-                                    <td style="text-align: right">Pending</td>
                                 </tr>
                             {% endfor %}
                     </table>
