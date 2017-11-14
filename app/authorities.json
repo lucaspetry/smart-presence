@@ -1,0 +1,16 @@
+{
+	"authorities": [
+		{
+			"name": "Authority1", 
+			"public_key": ""
+		},
+		{
+			"name": "Authority2", 
+			"public_key": ""
+		},
+		{
+			"name": "Authority3", 
+			"public_key": ""
+		}
+	]
+}

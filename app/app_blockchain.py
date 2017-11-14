@@ -8,7 +8,7 @@ from blockchain import Blockchain, Block
 app = Flask(__name__)
 api = Api(app)
 
-BLOCK_SIZE = 2
+BLOCK_SIZE = 1
 
 chain = Blockchain(BLOCK_SIZE)
 pending_transactions = []
@@ -34,12 +34,25 @@ class TransactionRes(Resource):
 
         if len(pending_transactions) == BLOCK_SIZE:
             block = Block(pending_transactions, chain.last_block())
-            chain.add_block(block)
-            print("Blockchain: block added!")
-            # Propagate block to other nodes
-            # Wait for confirmation (callback)
+            ret = chain.add_block(block)
+            if ret:
+                print("Blockchain: block added!")
+                # Propagate block to other nodes
+                # Wait for confirmation (callback)
 
-            pending_transactions = []
+                pending_transactions = []
+            else:
+                print('Blockchain: block refused! One or more transactions were invalid.')
+                # Do something to fix the block, 
+                # maybe by ditching any invalid transactions
+                # and adding the remainder to the pending_transactions list
+                remainder_transactions = []
+                for transaction in pending_transactions:
+                    if transaction.is_valid():
+                        remainder_transactions.append(transaction)
+
+                pending_transactions = remainder_transactions
+
 
         return {'status' : 'success'}
 

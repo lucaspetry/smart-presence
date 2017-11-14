@@ -38,6 +38,7 @@ class Blockchain(object):
 		return False
 
 	# Function to add all transactions, creating the blocks inside the function
+	# TODO see if there's any use for this function now, or if this is legacy code
 	def add_transactions(self, transactions):
 		# Add the pending transactions, if there are any
 		transactions = self.pending_transactions + transactions
@@ -100,7 +101,11 @@ class Blockchain(object):
 	# The chain >probably< already is valid, since before adding every block it is checked for validity, but
 	# TODO implement to make sure the chain is really valid.
 	def is_valid(self):
-		pass
+		for block in self.blocks:
+			if not block.is_valid():
+				return False
+
+		return True
 
 	def json(self):
 		return [block.json() for block in self.blocks]
@@ -135,6 +140,10 @@ class Block(object):
 
 		# Stored parent hash is equals to actual parent hash
 		if self.parent and self.parent.hash != self.parent_hash:
+			return False
+
+		# Timestamp of block creation is higher than parent's timestamp
+		if self.parent and self.timestamp < self.parent.timestamp:
 			return False
 
 		# Stored hash is equals to generated block hash
@@ -183,12 +192,3 @@ class Block(object):
 		}
 
 		return b64encode(bytes(json.dumps(block_content, sort_keys=True), 'utf-8'))
-
-
-
-if __name__ == '__main__':
-	chain = Blockchain(5, {'Alice': 5, 'Bob': 5})
-	transactions = [make_transaction() for i in range(30)]
-
-	chain.add_transactions(transactions)
-	json = chain.json()
