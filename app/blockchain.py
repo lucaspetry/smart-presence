@@ -5,13 +5,16 @@ from base64 import b64encode, b64decode
 from smart_presence import SmartPresence
 import time, calendar
 
+# A block chain
 class Blockchain(object):
 
+	# Constructs a block chain with blocks holding <block_size> transactions each
 	def __init__(self, block_size=5):
 		self.block_size = block_size
 		self.blocks = []
 		self.pending_transactions = []
 
+	# True if the given <block> is within the chain, False otherwise
 	def contains_block(self, block):
 		for b in blocks:
 			if b.hash == block.hash:
@@ -19,9 +22,18 @@ class Blockchain(object):
 
 		return False
 
+	# Returns the last block of the chain
+	def get_last_block(self):
+		if self.length() > 0:
+			return self.blocks[-1]
+		else:
+			return None
+
+	# Returns the latest <count> blocks of the chain
 	def get_last_blocks(self, count):
 		return self.blocks[-count:]
 
+	# Returns the block for the given <id>
 	def get_block(self, id):
 		for block in self.blocks:
 			if block.id == id:
@@ -29,7 +41,7 @@ class Blockchain(object):
 
 		return None
 
-	# Function to add a single block to the chain
+	# Adds a single block to the chain only if the block is valid
 	def add_block(self, block):
 		if block.is_valid():
 			self.blocks.append(block)
@@ -37,69 +49,11 @@ class Blockchain(object):
 		
 		return False
 
-	# Function to add all transactions, creating the blocks inside the function
-	# TODO see if there's any use for this function now, or if this is legacy code
-	def add_transactions(self, transactions):
-		# Add the pending transactions, if there are any
-		transactions = self.pending_transactions + transactions
-
-		# Every block other than the first must have always <max_block_size> transactions.
-		if len(transactions) < self.max_block_size:
-			return
-		else:
-			# Only add valid transactions
-			while len(transactions) > 0:
-				# Create a copy of the current state to work on
-				# The current state will only be updated when the block is created
-				# And guaranteed to be valid.
-				state = self.accounts_state.copy()
-				valid_transactions = []
-
-				while len(transactions) > 0 and len(valid_transactions) < self.max_block_size:
-					transaction = transactions.pop(0)
-					if transaction.is_valid(state):
-						valid_transactions.append(transaction)
-						state = transaction.execute(state)
-
-				# If the block hasn't reached it's max size, store the transactions to add on a later date.
-				# (This would happen if the first condition in the inside loop is true, but the second is false)
-				# If it has reached it's max size, create the block and add it to the chain, 
-				# and continue adding other transactions, if there are any
-				# (This would happen if the second condition in the inside loop is true)
-				if len(valid_transactions) < self.max_block_size:
-					self.pending_transactions = valid_transactions
-					return
-				else:
-					parent = self.last_block()
-					block = Block(valid_transactions, parent.id+1, parent)
-
-					# Verify if the block is valid
-					# TODO check if this is really necessary
-					# after all the work done to make sure no invalid transactions are added
-					if block.is_valid(self.accounts_state):
-						self.blocks.append(block)
-						self.accounts_state = block.get_final_state(self.accounts_state)
-
-
-		# parent = self.last_block()
-		# block = Block(transactions, parent.id+1, parent)
-
-		# if block.is_valid(self.accounts_state):
-		# 	self.blocks.append(block)
-		# 	self.accounts_state = block.get_final_state(self.accounts_state)
-
+	# Returns the length of the chain
 	def length(self):
 		return len(self.blocks)
 
-	def last_block(self):
-		if self.length() > 0:
-			return self.blocks[-1]
-		else:
-			# Show error or something
-			return
-
-	# The chain >probably< already is valid, since before adding every block it is checked for validity, but
-	# TODO implement to make sure the chain is really valid.
+	# True if the entire chain is valid, False otherwise
 	def is_valid(self):
 		for block in self.blocks:
 			if not block.is_valid():
@@ -107,11 +61,14 @@ class Blockchain(object):
 
 		return True
 
+	# Returns the json file representing the chain
 	def json(self):
 		return [block.json() for block in self.blocks]
 
+# A block of transactions
 class Block(object):
 
+	# Creates a block from its json file
 	@staticmethod
 	def fromJSON(json):
 		obj = Block([], None)
@@ -124,6 +81,7 @@ class Block(object):
 
 		return obj
 
+	# Constructs a block that holds <transactions>, preceded by <parent>
 	def __init__(self, transactions, parent=None):
 		self.id = parent.id + 1 if parent else 1
 		self.timestamp = time.gmtime()
@@ -133,6 +91,7 @@ class Block(object):
 		self.size = len(transactions)
 		self.hash = self.to_SHA256()
 
+	# True if the block is valid, False otherwise
 	def is_valid(self):
 		# Block ID is greater than parent ID by 1
 		if self.parent and self.id - self.parent.id != 1:
@@ -157,6 +116,28 @@ class Block(object):
 
 		return True
 
+	# Returns the SHA256 digest of the block
+	def to_SHA256(self):
+		return SHA256.new(self.to_base64()).digest()
+
+	# Returns the base64 representation of the block
+	def to_base64(self):
+		parent_hash = None
+
+		if self.parent:
+			parent_hash = b64encode(self.parent_hash).decode('utf-8')
+
+		block_content = {
+			'id': self.id,
+			'timestamp' : self.timestamp,
+			'parent_hash': parent_hash, 
+			'transaction_count': self.size, 
+			'transactions': [t.json() for t in self.transactions]
+		}
+
+		return b64encode(bytes(json.dumps(block_content, sort_keys=True), 'utf-8'))
+
+	# Returns the json file representing the block
 	def json(self):
 		parent_hash = None
 
@@ -173,22 +154,3 @@ class Block(object):
 		}
 
 		return json_block
-
-	def to_SHA256(self):
-		return SHA256.new(self.to_base64()).digest()
-
-	def to_base64(self):
-		parent_hash = None
-
-		if self.parent:
-			parent_hash = b64encode(self.parent_hash).decode('utf-8')
-
-		block_content = {
-			'id': self.id,
-			'timestamp' : self.timestamp,
-			'parent_hash': parent_hash, 
-			'transaction_count': self.size, 
-			'transactions': [t.json() for t in self.transactions]
-		}
-
-		return b64encode(bytes(json.dumps(block_content, sort_keys=True), 'utf-8'))

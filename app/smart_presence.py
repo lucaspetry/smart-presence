@@ -4,8 +4,12 @@ import Crypto.PublicKey.RSA as RSA
 from base64 import b64encode, b64decode 
 from json import load 
 
+# A SmartPresence transaction. Such transaction includes an 
+# entity and a signing authority. The authority must be an authority
+# in the blockchain network
 class SmartPresence(object):
 
+	# Creates a transaction from its json file
 	@staticmethod
 	def fromJSON(json):
 		authorityKey = RSA.importKey(b64decode(json['authority_pbk']))
@@ -20,6 +24,8 @@ class SmartPresence(object):
 
 		return obj
 
+	# Constructs a transaction between <authority_pbk> and <entity_pbk>, 
+	# with <entity_pbk> at location (<entity_lat>, <entity_lon>)
 	def __init__(self, id, authority_pbk, entity_pbk, entity_lat, entity_lon):
 		self.id = id
 		self.authority_pbk = authority_pbk
@@ -32,6 +38,15 @@ class SmartPresence(object):
 		self.pending = True
 		self.approved = None
 
+	# Signs the transaction with the given entity <key_pair>
+	def sign_entity(self, key_pair):
+		self.entity_signature = key_pair.decrypt(self.to_SHA256())
+
+	# Signs the transaction with the given authority <key_pair>
+	def sign_authority(self, key_pair):
+		self.authority_signature = key_pair.decrypt(self.to_SHA256())
+
+	# True if the transaction is valid, False otherwise
 	def is_valid(self):
 		with open('app/authorities.json') as authorities_file:
 			data = load(authorities_file)
@@ -43,14 +58,9 @@ class SmartPresence(object):
 					found = True
 					break
 
-		return found and self.check_signatures() # What else?
+		return found and self.check_signatures()
 
-	def sign_entity(self, entity_key_pair):
-		self.entity_signature = entity_key_pair.decrypt(self.to_SHA256())
-
-	def sign_authority(self, authority_key_pair):
-		self.authority_signature = authority_key_pair.decrypt(self.to_SHA256())
-
+	# True if the authority and entity signatures are valid, False otherwise
 	def check_signatures(self):
 		if not self.authority_pbk or not self.entity_pbk:
 			print('Check signatures: public key missing.')
@@ -74,15 +84,18 @@ class SmartPresence(object):
 
 		return True
 
+	# Returns the SHA256 digest of the transaction
 	def to_SHA256(self):
 		return SHA256.new(self.to_base64()).digest()
 
+	# Returns the base64 representation of the transaction
 	def to_base64(self):
 		string = str(self.timestamp) + str(self.authority_pbk.exportKey()) + str(self.entity_pbk.exportKey()) \
 		+ str(self.entity_lat) + str(self.entity_lon)
 
 		return b64encode(bytes(string, 'utf-8'))
 
+	# Returns the json file representing the block
 	def json(self):
 		block = {
 			'id' : self.id,

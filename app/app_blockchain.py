@@ -46,7 +46,7 @@ class TransactionRes(Resource):
         pending_transactions.append(sp)
 
         if len(pending_transactions) == BLOCK_SIZE:
-            block = Block(pending_transactions, chain.last_block())
+            block = Block(pending_transactions, chain.get_last_block())
             ret = chain.add_block(block)
             if ret:
                 print("Blockchain: block added!")
@@ -55,7 +55,7 @@ class TransactionRes(Resource):
 
                 pending_transactions = []
             else:
-                print('Blockchain: block refused! One or more transactions were invalid.')
+                print('Blockchain: block refused! One or more transactions are invalid.')
                 # Do something to fix the block, 
                 # maybe by ditching any invalid transactions
                 # and adding the remainder to the pending_transactions list
