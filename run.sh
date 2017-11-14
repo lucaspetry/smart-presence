@@ -2,9 +2,7 @@
 
 if [ "$1" = "app" ]
 then
-	export FLASK_APP=app/app_application.py
+	python3 app/app_application.py $2
 else
-    export FLASK_APP=app/app_blockchain.py
+    python3 app/app_blockchain.py $2
 fi
-
-flask run --host=0.0.0.0 --port="$2"

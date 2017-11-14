@@ -38,15 +38,12 @@ class SmartPresence(object):
 			authorities = data['authorities']
 
 			found = False
-			for authority in authorities:
+			for authority in authorities.values():
 				if authority['public_key'] == str(b64encode(self.authority_pbk.exportKey()).decode('utf-8')):
 					found = True
 					break
 
-			# if not found:
-			# 	return False
-
-		return self.check_signatures() # What else?
+		return found and self.check_signatures() # What else?
 
 	def sign_entity(self, entity_key_pair):
 		self.entity_signature = entity_key_pair.decrypt(self.to_SHA256())

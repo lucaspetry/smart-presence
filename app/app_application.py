@@ -7,20 +7,28 @@ from Crypto.PublicKey import RSA
 import time
 import requests
 import json
-from base64 import b64encode
+from base64 import b64encode, b64decode
+import sys
 
 app = Flask(__name__)
 
+PORT = sys.argv[1]
+PORT_NODE = 5002
 RAND_BITS = 20
 
-AUTHORITY_NAME = 'MY FAVORITE AUTHORITY'
-AUTHORITY_KEYPAIR = RSA.generate(2048)
+authorities = {}
+
+with open('app/authorities.json') as authorities_file:
+    authorities = json.load(authorities_file)['authorities']
+
+AUTHORITY_NAME = authorities[str(PORT_NODE)]['name']
+AUTHORITY_KEYPAIR = RSA.importKey(b64decode(authorities[str(PORT_NODE)]['key_pair']))
 AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
 
 BLOCK_COUNT = 10
-URL_GET_BLOCKS = 'http://127.0.0.1:5002/blocks/' + str(BLOCK_COUNT)
-URL_GET_BLOCK = 'http://127.0.0.1:5002/block/'
-URL_POST_TRANSACTION = 'http://127.0.0.1:5002/transaction'
+URL_GET_BLOCKS = 'http://127.0.0.1:' + str(PORT_NODE) + '/blocks/' + str(BLOCK_COUNT)
+URL_GET_BLOCK = 'http://127.0.0.1:' + str(PORT_NODE) + '/block/'
+URL_POST_TRANSACTION = 'http://127.0.0.1:' + str(PORT_NODE) + '/transaction'
 
 sessions = { 1 : Session(1, "Teste", AUTHORITY_PBK) }
 presences = {}
@@ -37,10 +45,6 @@ def base64_encode(value):
 app.jinja_env.filters['format_datetime'] = format_datetime
 app.jinja_env.filters['format_key'] = format_key
 app.jinja_env.filters['base64_encode'] = base64_encode
-
-#private_key = RSA.generate(2048)
-#with open("key.key", "wb") as file:
-    #file.write(private_key.exportKey('PEM'))
 
 def postTransaction(transaction):
     headers = {'content-type': 'application/json'}
@@ -174,3 +178,5 @@ def view_presence(sessionId, presenceId):
 def show_user_profile(username):
     # show the user profile for that user
     return 'User %s' % username
+
+app.run(port=PORT)

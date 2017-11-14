@@ -4,11 +4,24 @@ from flask_jsonpify import jsonify
 from Crypto.PublicKey import RSA
 from smart_presence import SmartPresence
 from blockchain import Blockchain, Block
+import sys
+from base64 import b64encode, b64decode
+import json
 
 app = Flask(__name__)
 api = Api(app)
 
+PORT = sys.argv[1]
 BLOCK_SIZE = 1
+
+authorities = {}
+
+with open('app/authorities.json') as authorities_file:
+    authorities = json.load(authorities_file)['authorities']
+
+AUTHORITY_NAME = authorities[str(PORT)]['name']
+AUTHORITY_KEYPAIR = RSA.importKey(b64decode(authorities[str(PORT)]['key_pair']))
+AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
 
 chain = Blockchain(BLOCK_SIZE)
 pending_transactions = []
@@ -82,8 +95,9 @@ class BlocksRes(Resource):
         return jsonify(sorted([b.json() for b in chain.get_last_blocks(count)], \
             key=lambda block: block['id'], reverse=True))
 
-
 api.add_resource(TransactionRes, '/transaction')
 api.add_resource(BlockRes, '/block')
 api.add_resource(BlockGetRes, '/block/<int:id>')
 api.add_resource(BlocksRes, '/blocks/<int:count>')
+
+app.run(port=PORT)
