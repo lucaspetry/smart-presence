@@ -12,13 +12,26 @@ app = Flask(__name__)
 api = Api(app)
 
 PORT = sys.argv[1]
-BLOCK_SIZE = 1
 
 authorities = {}
+settings = {}
 
-with open('app/authorities.json') as authorities_file:
-    authorities = json.load(authorities_file)['authorities']
+with open('app/network_setup.json') as network_setup_file:
+    data = json.load(network_setup_file)
+    authorities = data['authorities']
+    settings = data['network']
 
+##########################################################
+# Network Info
+##########################################################
+BLOCK_SIZE = settings['block_size']
+BLOCK_PERIOD = settings['block_period'] # Seconds
+AUTHORITY_COUNT = settings['authority_count']
+OUT_OF_TURN_DELAY = settings['out_of_turn_delay'] * AUTHORITY_COUNT # Seconds
+
+##########################################################
+# Authority Info
+##########################################################
 AUTHORITY_NAME = authorities[str(PORT)]['name']
 AUTHORITY_KEYPAIR = RSA.importKey(b64decode(authorities[str(PORT)]['key_pair']))
 AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
@@ -46,9 +59,10 @@ class TransactionRes(Resource):
         pending_transactions.append(sp)
 
         if len(pending_transactions) == BLOCK_SIZE:
-            block = Block(pending_transactions, chain.get_last_block())
-            ret = chain.add_block(block)
-            if ret:
+            block = Block(AUTHORITY_PBK, pending_transactions, chain.get_last_block())
+            block.sign(AUTHORITY_KEYPAIR)
+            
+            if chain.add_block(block, authorities):
                 print("Blockchain: block added!")
                 # Propagate block to other nodes
                 # Wait for confirmation (callback)
@@ -61,11 +75,10 @@ class TransactionRes(Resource):
                 # and adding the remainder to the pending_transactions list
                 remainder_transactions = []
                 for transaction in pending_transactions:
-                    if transaction.is_valid():
+                    if transaction.is_valid(authorities):
                         remainder_transactions.append(transaction)
 
                 pending_transactions = remainder_transactions
-
 
         return {'status' : 'success'}
 
@@ -77,7 +90,7 @@ class BlockRes(Resource):
         if chain.contains_block(block):
             return {'status' : 'failure'}
 
-        if chain.add_block(block):
+        if chain.add_block(block, authorities):
             return {'status' : 'success'}
 
         return {'status' : 'failure'}

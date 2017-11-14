@@ -12,19 +12,25 @@ import sys
 
 app = Flask(__name__)
 
-PORT = sys.argv[1]
-PORT_NODE = 5002
+PORT = sys.argv[1] # Port where application is running
+PORT_NODE = 5002 # Port where corresponding authority is running
 RAND_BITS = 20
 
 authorities = {}
 
-with open('app/authorities.json') as authorities_file:
+with open('app/network_setup.json') as authorities_file:
     authorities = json.load(authorities_file)['authorities']
 
+##########################################################
+# Authority Info
+##########################################################
 AUTHORITY_NAME = authorities[str(PORT_NODE)]['name']
 AUTHORITY_KEYPAIR = RSA.importKey(b64decode(authorities[str(PORT_NODE)]['key_pair']))
 AUTHORITY_PBK = AUTHORITY_KEYPAIR.publickey()
 
+##########################################################
+# Blockchain Node Info
+##########################################################
 BLOCK_COUNT = 10
 URL_GET_BLOCKS = 'http://127.0.0.1:' + str(PORT_NODE) + '/blocks/' + str(BLOCK_COUNT)
 URL_GET_BLOCK = 'http://127.0.0.1:' + str(PORT_NODE) + '/block/'

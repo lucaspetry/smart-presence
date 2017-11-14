@@ -31,6 +31,10 @@
                     <label for="session-name" class="control-label col-xs-4">Parent hash:</label>
                     <div id="session-name">{{ block.parent_hash|base64_encode() }}</div>
                 </div>
+                <div class="row no-gutters">
+                    <label for="public-key" class="control-label col-xs-4">Public key:</label>
+                    <textarea  id="public-key" rows="8" cols="60" disabled>{{ block.public_key.exportKey()|format_key() }}</textarea>
+                </div>
                 <br>
                 <h3>Transactions</h3>
                 {% if block.transactions|length == 0 %}

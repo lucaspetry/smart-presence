@@ -17,8 +17,8 @@ class SmartPresence(object):
 
 		obj = SmartPresence(json['id'], authorityKey, entityKey, json['entity_lat'], json['entity_lon'])
 		obj.timestamp = time.gmtime(calendar.timegm(json['timestamp']))
-		obj.entity_signature = b64decode(json['entity_signature'][2:-1])
-		obj.authority_signature = b64decode(json['authority_signature'][2:-1])
+		obj.entity_signature = b64decode(json['entity_signature'])
+		obj.authority_signature = b64decode(json['authority_signature'])
 		obj.pending = None
 		obj.approved = None
 
@@ -47,16 +47,12 @@ class SmartPresence(object):
 		self.authority_signature = key_pair.decrypt(self.to_SHA256())
 
 	# True if the transaction is valid, False otherwise
-	def is_valid(self):
-		with open('app/authorities.json') as authorities_file:
-			data = load(authorities_file)
-			authorities = data['authorities']
-
-			found = False
-			for authority in authorities.values():
-				if authority['public_key'] == str(b64encode(self.authority_pbk.exportKey()).decode('utf-8')):
-					found = True
-					break
+	def is_valid(self, authorities):
+		found = False
+		for authority in authorities.values():
+			if authority['public_key'] == str(b64encode(self.authority_pbk.exportKey()).decode('utf-8')):
+				found = True
+				break
 
 		return found and self.check_signatures()
 
@@ -104,8 +100,8 @@ class SmartPresence(object):
 			'timestamp' : self.timestamp,
 			'entity_lat' : self.entity_lat,
 			'entity_lon' : self.entity_lon,
-			'entity_signature' : str(b64encode(self.entity_signature)),
-			'authority_signature' : str(b64encode(self.authority_signature))
+			'entity_signature' : str(b64encode(self.entity_signature).decode('utf-8')),
+			'authority_signature' : str(b64encode(self.authority_signature).decode('utf-8'))
 		}
 
 		return block
