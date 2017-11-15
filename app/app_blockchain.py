@@ -110,7 +110,6 @@ class BlocksRes(Resource):
             key=lambda block: block['id'], reverse=True))
 
 api.add_resource(TransactionAppRes, '/transaction')
-api.add_resource(TransactionAppRes, '/post-transaction')
 api.add_resource(BlockRes, '/block')
 api.add_resource(BlockGetRes, '/block/<int:id>')
 api.add_resource(BlocksRes, '/blocks/<int:count>')
