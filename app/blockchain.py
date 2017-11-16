@@ -112,7 +112,7 @@ class Block(object):
 			return False
 
 		# Timestamp of block creation is higher than parent's timestamp
-		if self.parent and self.timestamp > self.parent.timestamp:
+		if self.parent and self.timestamp < self.parent.timestamp:
 			return False
 
 		# Stored hash is equals to generated block hash
